@@ -37,8 +37,25 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $sql = "UPDATE users SET balance = ? WHERE id = ?";
         $stmt = $conn->prepare($sql);
         $stmt->bind_param("di", $new_balance, $user_id);
+
         if ($stmt->execute()) {
-            echo "Transfer successful. New balance: ৳" . number_format($new_balance, 2);
+            // Now insert the transaction into the transactions table
+            // Set the bank's or merchant's ID as the receiver_id (you should fetch this from your merchants table)
+            $receiver_id = 1;  // Example: Replace with actual bank or merchant ID (e.g., from merchants table)
+            $transaction_type = 'add_money';  // Set the type of transaction
+            $description = 'Transferred from bKash to Bank';  // Transaction description
+
+            // Insert into transactions table
+            $transaction_sql = "INSERT INTO transactions (sender_id, receiver_id, amount, type, description) 
+                                VALUES (?, ?, ?, ?, ?)";
+            $transaction_stmt = $conn->prepare($transaction_sql);
+            $transaction_stmt->bind_param("iiiss", $user_id, $receiver_id, $transfer_amount, $transaction_type, $description);
+
+            if ($transaction_stmt->execute()) {
+                echo "Transfer successful. Your new balance is: ৳" . number_format($new_balance, 2);
+            } else {
+                echo "Error inserting transaction record: " . $transaction_stmt->error;
+            }
         } else {
             echo "Error updating balance.";
         }
@@ -61,8 +78,21 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 <h2>Transfer from bKash to Bank</h2>
 
 <form method="POST" action="">
-    <label for="amount">Amount to transfer (in ৳):</label>
-    <input type="number" id="amount" name="amount" min="1" max="<?php echo $balance; ?>" required>
+<label for="amount">Amount to transfer (in ৳):</label>
+    <input type="number" id="amount" name="amount" min="1" max="<?php echo $balance; ?>" required><br><br>
+
+    <label for="bank_name">Select Bank:</label>
+    <select id="bank_name" name="bank_name" required>
+        <option value="DBBL">Dutch-Bangla Bank Ltd (DBBL)</option>
+        <option value="BRAC">BRAC Bank</option>
+        <option value="City">City Bank</option>
+        <option value="IFIC">IFIC Bank</option>
+    </select><br><br>
+
+    <label for="bank_account">Bank Account Number:</label>
+    <input type="text" id="bank_account" name="bank_account" required><br><br>
+    <label for="pin">Enter Your bKash PIN:</label>
+    <input type="password" id="pin" name="pin" required><br><br>
     <button type="submit">Transfer</button>
 </form>
 
