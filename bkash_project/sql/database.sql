@@ -8,9 +8,14 @@ CREATE TABLE users (
     name VARCHAR(255) NOT NULL,
     email VARCHAR(255) UNIQUE NOT NULL,
     phone VARCHAR(20) UNIQUE NOT NULL,
-    password VARCHAR(255) NOT NULL,
+    nid VARCHAR(30) UNIQUE NOT NULL,  -- Extended length for NID
+    dob DATE NOT NULL,  -- Date of Birth
+    address TEXT NOT NULL,  -- Address
+    password VARCHAR(255) NOT NULL,  -- Hashed password
+    pin VARCHAR(255) NOT NULL,  -- Hashed PIN for security
     balance DECIMAL(10,2) DEFAULT 0.00
 );
+
 
 -- Create merchants table
 CREATE TABLE merchants (
@@ -21,18 +26,18 @@ CREATE TABLE merchants (
     status ENUM('active', 'inactive') NOT NULL DEFAULT 'active'
 );
 
--- Create transactions table
 CREATE TABLE transactions (
     id INT AUTO_INCREMENT PRIMARY KEY,
     sender_id INT NOT NULL,
-    receiver_id INT NOT NULL,
+    receiver_id INT DEFAULT NULL, -- NULL for cases like 'add_money'
+    receiver_type ENUM('user', 'merchant', 'bank') DEFAULT NULL,  
     amount DECIMAL(10,2) NOT NULL,
     type ENUM('send_money', 'recharge', 'receive_money', 'cash_out', 'add_money', 'payment', 'pay_bill') NOT NULL,
-    description VARCHAR(255) DEFAULT NULL, -- Allows NULL values
+    description VARCHAR(255) DEFAULT NULL,
+    transaction_id VARCHAR(50) UNIQUE NOT NULL,  -- Added transaction_id
     date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (sender_id) REFERENCES users(id) ON DELETE CASCADE,
-    -- For now, we use `users(id)` for general transactions, and you manage merchants in the app logic.
-    FOREIGN KEY (receiver_id) REFERENCES users(id) ON DELETE CASCADE
+    FOREIGN KEY (receiver_id) REFERENCES users(id) ON DELETE CASCADE -- Allows tracking receivers
 );
 
 -- Create mobile_recharge table
@@ -46,7 +51,7 @@ CREATE TABLE mobile_recharge (
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
--- Create the payments table
+-- Create payments table
 CREATE TABLE payments (
     id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT NOT NULL,
@@ -68,12 +73,16 @@ CREATE TABLE bill_payments (
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
--- Create add_money table
+-- Create add_money table (UPDATED)
 CREATE TABLE add_money (
     id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT NOT NULL,
     amount DECIMAL(10,2) NOT NULL,
     payment_method ENUM('bank', 'card') NOT NULL,
+    bank_account VARCHAR(50) DEFAULT NULL,  -- Stores bank account number if method is 'bank'
+    bank_pin VARCHAR(20) DEFAULT NULL,  -- Stores bank PIN if method is 'bank'
+    card_number VARCHAR(20) DEFAULT NULL,  -- Stores card number if method is 'card'
+    cvv VARCHAR(4) DEFAULT NULL,  -- Stores card CVV if method is 'card'
     transaction_id VARCHAR(100) NOT NULL,
     status ENUM('pending', 'completed', 'failed') DEFAULT 'pending',
     date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
