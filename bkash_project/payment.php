@@ -51,6 +51,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
 }
 ?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Make a Payment</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
 
 <h2>Make a Payment</h2>
 <form method="post">
@@ -73,4 +82,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <input type="number" name="amount" id="amount" min="1" required><br><br>
 
     <button type="submit">Pay</button>
+
+    <br>
+    <a href="dashboard.php">Go Back to Dashboard</a>
 </form>
