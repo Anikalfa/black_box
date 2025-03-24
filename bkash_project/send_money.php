@@ -12,6 +12,15 @@ $stmt->execute();
 $result = $stmt->get_result();
 
 ?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Send Money</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
 
 <h2>Send Money</h2>
 <form action="send_money_process.php" method="post">
@@ -25,4 +34,6 @@ $result = $stmt->get_result();
     </select><br>
     <input type="number" name="amount" placeholder="Amount" required><br>
     <button type="submit">Send Money</button>
+
+   
 </form>
